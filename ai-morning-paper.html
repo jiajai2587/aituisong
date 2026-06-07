@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 资讯晨报</title>
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --secondary: #f7c59f;
+            --dark: #2d3142;
+            --light: #ffffff;
+            --bg: #f7f7f7;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background: var(--bg);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #ff6b35 0%, #e63946 50%, #d00000 100%);
+            color: var(--light);
+            padding: 3rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-date {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: var(--light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            padding: 1rem;
+        }
+
+        .nav-links {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, #ff6b35 0%, #e63946 100%);
+            color: var(--light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(135deg, #ff6b35, #e63946) 1;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ff6b35, #e63946);
+            color: var(--light);
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg);
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+            line-height: 1.4;
+        }
+
+        .card-summary {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-time {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #ff6b35, #e63946);
+            color: var(--light);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-link:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                gap: 0.25rem;
+            }
+
+            .nav-link {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>🌅 AI 资讯晨报</h1>
+            <div class="hero-date" id="heroDate">加载中...</div>
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-links">
+            <a class="nav-link" data-section="models">模型发布/更新</a>
+            <a class="nav-link" data-section="products">产品发布/更新</a>
+            <a class="nav-link" data-section="industry">行业动态</a>
+            <a class="nav-link" data-section="papers">论文研究</a>
+            <a class="nav-link" data-section="tips">技巧与观点</a>
+        </div>
+    </nav>
+
+    <div class="container" id="content"></div>
+
+    <footer class="footer" id="footer"></footer>
+
+    <script>
+        const CATEGORIES = {
+            models: "模型发布/更新",
+            products: "产品发布/更新",
+            industry: "行业动态",
+            papers: "论文研究",
+            tips: "技巧与观点"
+        };
+
+        function formatTime(dateStr) {
+            const now = new Date();
+            const date = new Date(dateStr);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 60) {
+                return `${diffMins} 分钟前`;
+            } else if (diffHours < 24) {
+                return `${diffHours} 小时前`;
+            } else if (diffDays === 0) {
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const period = date.getHours() < 12 ? '上午' : '下午';
+                return `今天${period} ${hours}:${minutes}`;
+            } else if (diffDays === 1) {
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const period = date.getHours() < 12 ? '上午' : '下午';
+                return `昨天${period} ${hours}:${minutes}`;
+            } else {
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${month}-${day}`;
+            }
+        }
+
+        function formatDateChinese(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const weekday = weekdays[date.getDay()];
+            return `${year}年${month}月${day}日 ${weekday}`;
+        }
+
+        function truncateSummary(text, maxLength = 60) {
+            if (text.length <= maxLength) return text;
+            return text.slice(0, maxLength) + '...';
+        }
+
+        function generateMockData() {
+            const now = new Date();
+            return {
+                date: now.toISOString(),
+                items: [
+                    { id: 1, category: 'models', title: 'GPT-5 发布在即，OpenAI 透露新模型细节', source: 'The Verge', summary: 'OpenAI 首席执行官 Sam Altman 在最新采访中透露，GPT-5 将带来革命性的推理能力提升，预计今年秋季发布。', url: 'https://example.com/gpt5', publishedAt: new Date(now - 2 * 60 * 60 * 1000).toISOString() },
+                    { id: 2, category: 'models', title: 'Claude 3.5 Sonnet 正式上线，代码能力翻倍', source: 'Anthropic', summary: 'Anthropic 发布 Claude 3.5 Sonnet，在代码生成和数学推理方面取得重大突破，同时保持成本不变。', url: 'https://example.com/claude35', publishedAt: new Date(now - 4 * 60 * 60 * 1000).toISOString() },
+                    { id: 3, category: 'products', title: 'Notion AI 推出全新写作助手功能', source: 'Notion', summary: 'Notion 更新 AI 功能，新增多语言翻译、实时协作编辑和智能文档总结，大幅提升团队工作效率。', url: 'https://example.com/notion-ai', publishedAt: new Date(now - 6 * 60 * 60 * 1000).toISOString() },
+                    { id: 4, category: 'products', title: 'Midjourney v7 震撼发布，图像质量再升级', source: 'Midjourney', summary: 'Midjourney 第七代模型上线，支持 8K 分辨率输出和更精准的文本理解，生成效果逼近真实摄影。', url: 'https://example.com/midjourney-v7', publishedAt: new Date(now - 8 * 60 * 60 * 1000).toISOString() },
+                    { id: 5, category: 'industry', title: '微软投资 100 亿美元扩大 AI 基础设施', source: 'Bloomberg', summary: '微软宣布将在未来两年投资 100 亿美元用于 AI 数据中心建设，以满足日益增长的算力需求。', url: 'https://example.com/msft-ai-investment', publishedAt: new Date(now - 10 * 60 * 60 * 1000).toISOString() },
+                    { id: 6, category: 'industry', title: '国内 AI 大模型监管新规正式实施', source: '财新网', summary: '国家网信办发布的《生成式人工智能服务管理暂行办法》今日正式实施，明确了数据安全和内容规范要求。', url: 'https://example.com/ai-regulation', publishedAt: new Date(now - 12 * 60 * 60 * 1000).toISOString() },
+                    { id: 7, category: 'papers', title: 'DeepMind 发表论文揭示 Transformer 内部工作机制', source: 'arXiv', summary: 'DeepMind 最新研究通过可解释性方法，首次完整揭示了 Transformer 模型处理语言的内部神经通路。', url: 'https://example.com/transformer-mechanism', publishedAt: new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString() },
+                    { id: 8, category: 'papers', title: '斯坦福提出新型高效训练方法，显存占用减少 70%', source: 'Stanford', summary: '斯坦福大学研究团队提出创新的训练优化算法，在保持模型性能的同时大幅降低显存消耗。', url: 'https://example.com/efficient-training', publishedAt: new Date(now - 1.5 * 24 * 60 * 60 * 1000).toISOString() },
+                    { id: 9, category: 'tips', title: 'Prompt Engineering 最佳实践：结构化提示词模板', source: 'Medium', summary: '分享一套经过验证的提示词模板，帮助你更有效地与 AI 对话，获得更高质量的回答。', url: 'https://example.com/prompt-tips', publishedAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString() },
+                    { id: 10, category: 'tips', title: '如何用 AI 进行高效的文献综述和研究', source: '知乎', summary: '资深研究员分享利用 AI 工具加速学术研究的实用技巧，涵盖文献检索、阅读笔记和论文写作。', url: 'https://example.com/ai-research-tips', publishedAt: new Date(now - 2.5 * 24 * 60 * 60 * 1000).toISOString() }
+                ]
+            };
+        }
+
+        async function fetchData() {
+            try {
+                const now = new Date();
+                const hour = now.getHours();
+                let data;
+                if (hour < 8) {
+                    console.log('早于 08:00，使用最近一期数据');
+                }
+                data = generateMockData();
+                return data;
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                return generateMockData();
+            }
+        }
+
+        function renderStats(items) {
+            const statsContainer = document.getElementById('stats');
+            const counts = { total: items.length };
+            Object.keys(CATEGORIES).forEach(category => {
+                counts[category] = items.filter(item => item.category === category).length;
+            });
+
+            let html = `
+                <div class="stat-card">
+                    <div class="stat-number">${counts.total}</div>
+                    <div class="stat-label">总条数</div>
+                </div>
+            `;
+
+            Object.entries(CATEGORIES).forEach(([key, label]) => {
+                html += `
+                    <div class="stat-card">
+                        <div class="stat-number">${counts[key] || 0}</div>
+                        <div class="stat-label">${label}</div>
+                    </div>
+                `;
+            });
+
+            statsContainer.innerHTML = html;
+            return counts;
+        }
+
+        function renderCard(item, index) {
+            return `
+                <div class="card" data-card-index="${index}">
+                    <div class="card-header">
+                        <span class="card-number">${index + 1}</span>
+                        <span class="chip">${item.source}</span>
+                    </div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-summary">${truncateSummary(item.summary)}</div>
+                    <div class="card-footer">
+                        <span class="card-time">${formatTime(item.publishedAt)}</span>
+                        <a href="${item.url}" class="card-link" target="_blank" rel="noopener noreferrer">
+                            查看原文 →
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContent(items) {
+            const container = document.getElementById('content');
+            let html = '';
+            let globalIndex = 0;
+
+            Object.entries(CATEGORIES).forEach(([categoryKey, categoryLabel]) => {
+                const categoryItems = items.filter(item => item.category === categoryKey);
+                if (categoryItems.length === 0) return;
+
+                html += `
+                    <section class="section" id="section-${categoryKey}">
+                        <h2 class="section-title">${categoryLabel}</h2>
+                        <div class="cards-grid">
+                `;
+
+                categoryItems.forEach(item => {
+                    html += renderCard(item, globalIndex);
+                    globalIndex++;
+                });
+
+                html += `
+                        </div>
+                    </section>
+                `;
+            });
+
+            container.innerHTML = html;
+            return globalIndex;
+        }
+
+        function renderFooter(totalCount) {
+            const footer = document.getElementById('footer');
+            footer.innerHTML = `
+                <p>共 <strong>${totalCount}</strong> 条资讯 · 数据来源：AIHot 日报接口</p>
+            `;
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = link.dataset.section;
+                    const section = document.getElementById(`section-${sectionId}`);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        }
+
+        function setupScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            const cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.section').forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+            document.querySelectorAll('.card').forEach(card => {
+                cardObserver.observe(card);
+            });
+        }
+
+        async function init() {
+            const data = await fetchData();
+            const date = new Date(data.date);
+
+            document.getElementById('heroDate').textContent = formatDateChinese(date);
+            renderStats(data.items);
+            const totalCount = renderContent(data.items);
+            renderFooter(totalCount);
+            setupNavigation();
+            setTimeout(setupScrollAnimations, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
